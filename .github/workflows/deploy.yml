@@ -19,6 +19,14 @@ jobs:
       - run: npm ci -f
       - run: npm run build
 
+      - name: Subir estáticos a S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: aws s3 sync out/_next s3://todo-estaticos-rosmelgalvis-2026/_next
+
       - name: Configurar SSH
         run: |
           mkdir -p ~/.ssh
@@ -28,5 +36,4 @@ jobs:
 
       - name: Copiar out/ a EC2
         run: |
-          rsync -avz --delete -e "ssh -i ~/.ssh/key.pem" \
-            ./out/ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/var/www/html/
+          rsync -avz --delete -e "ssh -i ~/.ssh/key.pem" out/ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/var/www/html/
